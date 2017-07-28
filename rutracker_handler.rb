@@ -4,6 +4,8 @@ require './rutracker_api'
 
 class RutrackerHandler
 
+  MOVIE_PAGE = 'https://rutracker.org/forum/viewtopic.php?t='
+
   def initialize
     @client = RutrackerApi.new(ENV['USERNAME'], ENV['PASSWORD'])
   end
@@ -14,7 +16,7 @@ class RutrackerHandler
     unless search_result.is_a? Hash
       sorted_by_size = sorter.sort_by_torrent_size(search_result)
       torrent_id = sorted_by_size.last[:torrent_id]
-      "https://rutracker.org/forum/viewtopic.php?t=#{torrent_id}"
+      MOVIE_PAGE + torrent_id.to_s
     end
     "Oops! Can't find one"
   end

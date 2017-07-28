@@ -6,11 +6,12 @@ class RutrackerApi
 
   LOGIN_PAGE = 'http://rutracker.org/forum/login.php'
   SEARCH_PAGE = 'http://rutracker.org/forum/tracker.php'
+  PROFILE_PAGE = 'http://rutracker.org/forum/profile.php?mode=viewprofile&u='
 
   ORDER_OPTIONS = { date: 1,  name: 2, downloads: 4, shows: 6, seeders: 10,
                     leechers: 11, size: 7, last_post: 8, speed_up: 12,
                     speed_down: 13, message_count: 5, last_seed: 9 }
-  SORT_OPTIONS = {asc: 1, desc: 2}
+  SORT_OPTIONS = { asc: 1, desc: 2 }
 
   def initialize(username, pass)
     @agent = Mechanize.new
@@ -30,14 +31,13 @@ class RutrackerApi
 
   def find_user(nick)
     # TODO: add parser for user pages
-    @agent.get 'http://rutracker.org/forum/profile.php?mode=viewprofile&u=' + nick
+    @agent.get PROFILE_PAGE + nick
   end
 
   private
   def login(username, pass)
     @agent.post(LOGIN_PAGE, login_username: username,
                 login_password: pass, login: 'Вход')
-
   end
 
   def prepare_query_string(options)
@@ -58,7 +58,7 @@ class RutrackerApi
   def parse_search
     @agent.page.search("//table[@class='forumline tablesorter']/tbody/tr").map do |row|
       if row.css(".row1").text =~ /Не найдено/
-        return {error: 'Not found'}
+        return { error: 'Not found' }
       end
       description = row.at("td[4]").text.strip
       torrent_id =  row.at("td[4]//a").attributes['data-topic_id'].text.to_i
