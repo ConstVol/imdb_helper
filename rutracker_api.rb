@@ -5,7 +5,7 @@ class RutrackerApi
   attr_accessor :agent
 
   LOGIN_PAGE = 'http://rutracker.org/forum/login.php'
-  SEARCH_PAGE = 'http://rutracker.org/forum/tracker.php'
+  SEARCH_PAGE = 'http://rutracker.org/forum/tracker.php?'
   PROFILE_PAGE = 'http://rutracker.org/forum/profile.php?mode=viewprofile&u='
 
   ORDER_OPTIONS = { date: 1,  name: 2, downloads: 4, shows: 6, seeders: 10,
@@ -44,7 +44,7 @@ class RutrackerApi
     prepared = { f: options[:category], nm: options[:term],
                  s: SORT_OPTIONS[options[:sort]], o: ORDER_OPTIONS[options[:order_by]] }
 
-    query = SEARCH_PAGE + '?'
+    query = SEARCH_PAGE
     if prepared[:nm]
       query.gsub! '&', ''
       query << "nm=%22#{prepared[:nm]}%22"
@@ -57,9 +57,8 @@ class RutrackerApi
 
   def parse_search
     @agent.page.search("//table[@class='forumline tablesorter']/tbody/tr").map do |row|
-      if row.css(".row1").text =~ /Не найдено/
-        return { error: 'Not found' }
-      end
+      return { error: 'Not found' } if row.css(".row1").text =~ /Не найдено/
+
       description = row.at("td[4]").text.strip
       torrent_id =  row.at("td[4]//a").attributes['data-topic_id'].text.to_i
       size = row.at("td[6]/a").text.chomp(" ↓")
